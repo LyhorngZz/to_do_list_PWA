@@ -32,12 +32,14 @@ export class AuthService {
     );
 
     const user = await this.usersService.create({
+      username: registerDto.username,
       email: registerDto.email,
       password: hashedPassword,
     });
 
     return {
       id: user.id,
+      username: user.username,
       email: user.email,
     };
   }
@@ -68,6 +70,7 @@ export class AuthService {
     const payload = {
       sub: user.id,
       email: user.email,
+      username: user.username
     };
 
     return {
