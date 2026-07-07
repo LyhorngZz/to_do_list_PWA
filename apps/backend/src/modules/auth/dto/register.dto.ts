@@ -1,4 +1,5 @@
 import { IsEmail, IsString, MinLength } from 'class-validator';
+import { Column } from 'typeorm';
 
 export class RegisterDto {
   @IsEmail()
@@ -7,4 +8,9 @@ export class RegisterDto {
   @IsString()
   @MinLength(6)
   password: string;
+
+  @IsString()
+  @MinLength(3)
+  username: string;
+
 }
