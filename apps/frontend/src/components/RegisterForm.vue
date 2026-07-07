@@ -52,6 +52,20 @@
       />
     </div>
 
+    <p
+      v-if="successMessage"
+      class="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-green-600"
+    >
+      {{ successMessage }}
+    </p>
+
+    <p
+      v-if="errorMessage"
+      class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-600"
+    >
+      {{ errorMessage }}
+    </p>
+
     <button
         type="submit"
         class="w-full rounded-xl bg-blue-600 py-3 font-semibold text-white transition hover:bg-blue-700"
@@ -77,34 +91,36 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import authService from "@/services/auth.service";
 
-defineEmits(["switch"]);
+const emit = defineEmits(["switch"]);
 
-const router = useRouter();
-const authStore = useAuthStore();
+// const router = useRouter();
+// const authStore = useAuthStore();
 
 const username = ref("");
 const email = ref("");
 const password = ref("");
 const confirmPassword = ref("");
+const errorMessage = ref("");
+const successMessage = ref("");
 
-function register() {
-  if (
-    !username.value.trim() ||
-    !email.value.trim() ||
-    !password.value.trim() ||
-    !confirmPassword.value.trim()
-  ) {
-    alert("Please fill in all fields.");
-    return;
+async function register() {
+  try {
+    await authService.register(
+      email.value,
+      password.value
+    );
+
+    successMessage.value = "Registration successful. Please login.";
+
+    setTimeout(() => {
+      emit("switch");
+    }, 1500);
+
+  } catch (error: any) {
+    errorMessage.value =
+      error.response?.data?.message || "Registration failed.";
   }
-
-  if (password.value !== confirmPassword.value) {
-    alert("Passwords do not match.");
-    return;
-  }
-
-  authStore.login();
-  router.push("/todos");
 }
 </script>

@@ -27,10 +27,10 @@
     </div>
 
     <p
-        v-if="error"
+        v-if="errorMessage"
         class="text-sm text-red-500"
     >
-    {{ error }}
+    {{ errorMessage }}
     </p>
 
     <button
@@ -58,23 +58,37 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import authService from "@/services/auth.service";
 
 const router = useRouter();
 const authStore = useAuthStore();
 
 const email = ref("");
 const password = ref("");
-const error = ref("");
+const errorMessage = ref("");
 
-function login() {
-  error.value = "";
+async function login() {
+  errorMessage.value = "";
+  try {
+    const result = await authService.login(
+      email.value,
+      password.value
+    );
 
-  if (!email.value.trim() || !password.value.trim()) {
-    error.value = "Please enter your email and password.";
-    return;
+    authStore.login(result.access_token);
+
+    router.push("/todos");
+  } catch (error) {
+    console.error(error);
+    const apiMessage = (error as any)?.response?.data?.message;
+
+    if (typeof apiMessage === "string") {
+      errorMessage.value = apiMessage;
+    } else if (error instanceof Error) {
+      errorMessage.value = error.message;
+    } else {
+      errorMessage.value = "Login failed.";
+    }
   }
-
-  authStore.login();
-  router.push("/todos");
 }
 </script>
