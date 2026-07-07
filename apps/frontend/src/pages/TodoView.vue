@@ -70,56 +70,60 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
+import type { Subscription } from "rxjs";
+
 import Navbar from "@/components/Navbar.vue";
 import TodoCard from "@/components/TodoCard.vue";
 import TodoForm from "@/components/TodoForm.vue";
-import type { Todo } from "@/types/todo";
 
-const todos = ref<Todo[]>([
-  {
-    id: 1,
-    title: "Learn Vue",
-    description: "Practice Composition API",
-    completed: false,
-  },
-]);
+import todoService from "@/services/todo.service";
+
+import type { TodoDocType } from "@/database/schemas/todo.schema";
+
+const todos = ref<TodoDocType[]>([]);
 
 const showForm = ref(false);
-const editingTodo = ref<Todo | null>(null);
+const editingTodo = ref<TodoDocType | null>(null);
 
-function addTodo(todo: Omit<Todo, "id">) {
-  todos.value.unshift({
-    id: Date.now(),
-    ...todo,
-  });
+let subscription: Subscription;
 
-  showForm.value = false;
-  editingTodo.value = null;
+onMounted(() => {
+  subscription = todoService
+    .getTodoStream()
+    .subscribe((docs) => {
+      todos.value = docs.map((doc) => doc.toJSON());
+    });
+});
+
+onUnmounted(() => {
+  subscription?.unsubscribe();
+});
+
+async function addTodo(todo: Omit<TodoDocType, "id">) {
+  await todoService.addTodo(
+    todo.title,
+    todo.description
+  );
+
+  cancelForm();
 }
 
-function updateTodo(todo: Todo) {
-  const index = todos.value.findIndex(t => t.id === todo.id);
+async function updateTodo(todo: TodoDocType) {
+  await todoService.updateTodo(todo);
 
-  if (index !== -1)
-    todos.value[index] = todo;
-
-  editingTodo.value = null;
-  showForm.value = false;
+  cancelForm();
 }
 
-function deleteTodo(id: number) {
-  todos.value = todos.value.filter(t => t.id !== id);
+async function deleteTodo(id: string) {
+  await todoService.deleteTodo(id);
 }
 
-function toggleComplete(id: number) {
-  const todo = todos.value.find(t => t.id === id);
-
-  if (todo)
-    todo.completed = !todo.completed;
+async function toggleComplete(id: string) {
+  await todoService.toggleComplete(id);
 }
 
-function editTodo(todo: Todo) {
+function editTodo(todo: TodoDocType) {
   editingTodo.value = { ...todo };
   showForm.value = true;
 }
@@ -130,15 +134,17 @@ function openAddForm() {
 }
 
 function cancelForm() {
-  showForm.value = false;
   editingTodo.value = null;
+  showForm.value = false;
 }
 
-function saveTodo(todo: Todo | Omit<Todo, "id">) {
+async function saveTodo(todo: TodoDocType | Omit<TodoDocType, "id">) {
+  console.log("saveTodo()", todo);
+
   if (editingTodo.value) {
-    updateTodo(todo as Todo);
+    await updateTodo(todo as TodoDocType);
   } else {
-    addTodo(todo as Omit<Todo, "id">);
+    await addTodo(todo as Omit<TodoDocType, "id">);
   }
 }
 </script>

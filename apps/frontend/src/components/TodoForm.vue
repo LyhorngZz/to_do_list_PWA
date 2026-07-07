@@ -17,6 +17,7 @@
 
       <div class="flex justify-end gap-3">
         <button
+          type="button"
           class="rounded-xl border border-slate-300 px-5 py-2 hover:bg-slate-100"
           @click="emit('cancel')"
         >
@@ -24,6 +25,7 @@
         </button>
 
         <button
+          type="button"
           class="rounded-xl bg-blue-600 px-5 py-2 text-white hover:bg-blue-700"
           @click="submit"
         >
@@ -36,14 +38,14 @@
 
 <script setup lang="ts">
 import { ref, watch } from "vue";
-import type { Todo } from "@/types/todo";
+import type { TodoDocType } from "@/database/schemas/todo.schema";
 
 const props = defineProps<{
-  todo?: Todo | null;
+  todo?: TodoDocType | null;
 }>();
 
 const emit = defineEmits<{
-  (e: "save", todo: Todo | Omit<Todo, "id">): void;
+  (e: "save", todo: TodoDocType | Omit<TodoDocType, "id">): void;
   (e: "cancel"): void;
 }>();
 
@@ -60,19 +62,32 @@ watch(
 );
 
 function submit() {
-  if (!title.value.trim()) return;
+  console.log("Submit clicked");
+
+  if (!title.value.trim()) {
+    console.log("Title is empty");
+    return;
+  }
 
   if (props.todo) {
+    console.log("Editing todo");
+
     emit("save", {
       ...props.todo,
       title: title.value,
       description: description.value,
     });
   } else {
+    console.log("Creating todo");
+
     emit("save", {
       title: title.value,
       description: description.value,
       completed: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      syncStatus: "pending",
+      deleted: false,
     });
   }
 
