@@ -10,8 +10,9 @@ class AuthService {
         return response.data;
     }
 
-    async register(email: string, password: string) {
+    async register(username: string, email: string, password: string) {
         const response = await api.post("/auth/register", {
+            username,
             email,
             password,
         });

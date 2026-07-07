@@ -108,6 +108,7 @@ const successMessage = ref("");
 async function register() {
   try {
     await authService.register(
+      username.value,
       email.value,
       password.value
     );
