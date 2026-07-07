@@ -89,14 +89,9 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { useRouter } from "vue-router";
-import { useAuthStore } from "@/stores/auth";
 import authService from "@/services/auth.service";
 
 const emit = defineEmits(["switch"]);
-
-// const router = useRouter();
-// const authStore = useAuthStore();
 
 const username = ref("");
 const email = ref("");

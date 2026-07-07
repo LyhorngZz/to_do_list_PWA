@@ -4,6 +4,7 @@ import { getRxStorageDexie } from "rxdb/plugins/storage-dexie";
 import { todoSchema } from "./schemas/todo.schema";
 
 import type { AppDatabase } from "./types";
+import { syncQueueSchema } from "./schemas/sync-queue.schema";
 
 export const db: AppDatabase = await createRxDatabase({
     name: "todo-pwa",
@@ -15,6 +16,9 @@ export const db: AppDatabase = await createRxDatabase({
 await db.addCollections({
     todos: {
         schema: todoSchema,
+    },
+    syncQueue: {
+        schema: syncQueueSchema,
     },
 });
 

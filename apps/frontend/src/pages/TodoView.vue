@@ -18,7 +18,7 @@
         <button
           v-if="!showForm"
           @click="openAddForm"
-          class="rounded-xl bg-blue-600 px-5 py-3 font-medium text-white shadow transition hover:bg-blue-700"
+          class="rounded-xl bg-blue-600 px-5 py-3 font-medium text-white shadow transition hover:bg-blue-700 cursor-pointer"
         >
           + Add Task
         </button>
@@ -62,7 +62,7 @@
             :completed="todo.completed"
             @toggle="toggleComplete(todo)"
             @edit="editTodo(todo)"
-            @delete="deleteTodo(todo.id)"
+            @delete="deleteTodo(todo)"
         />
       </div>
     </main>
@@ -71,106 +71,56 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from "vue";
-// import type { Subscription } from "rxjs";
-
+import type { Subscription } from "rxjs";
 import Navbar from "@/components/Navbar.vue";
 import TodoCard from "@/components/TodoCard.vue";
 import TodoForm from "@/components/TodoForm.vue";
-
-import todoService from "@/services/todo.service";
-
 import type { TodoDocType } from "@/database/schemas/todo.schema";
-import todoApi from "@/services/todo.api";
+import todoService from "@/services/todo.service";
+import type { CreateTodoDto } from "@/types/create-todo.dto";
 
 const todos = ref<TodoDocType[]>([]);
 
 const showForm = ref(false);
 const editingTodo = ref<TodoDocType | null>(null);
 
-// let subscription: Subscription;
+let subscription: Subscription | undefined;
 
-// onMounted(() => {
-//   subscription = todoService
-//     .getTodoStream()
-//     .subscribe((docs) => {
-//       todos.value = docs.map((doc) => doc.toJSON());
-//     });
-// });
+onMounted(async () => {
+    await todoService.initialize();
 
-// onUnmounted(() => {
-//   subscription?.unsubscribe();
-// });
+    subscription = todoService
+        .getTodoStream()
+        .subscribe((docs) => {
+            todos.value = docs.map(doc => doc.toJSON());
+        });
+});
 
-onMounted(loadTodos);
+onUnmounted(() => {
+  subscription?.unsubscribe();
+});
 
-async function loadTodos() {
-  todos.value = await todoApi.getTodos();
-}
-
-// async function addTodo(todo: Omit<TodoDocType, "id">) {
-//   await todoService.addTodo(
-//     todo.title,
-//     todo.description
-//   );
-
-//   cancelForm();
-// }
-
-async function addTodo(todo: Omit<TodoDocType, "id">) {
-  await todoApi.createTodo({
-    title: todo.title,
-    description: todo.description,
-  });
-
-  await loadTodos();
+async function addTodo(todo: CreateTodoDto) {
+  await todoService.addTodo(
+    todo.title,
+    todo.description
+  );
 
   cancelForm();
 }
-
-// async function updateTodo(todo: TodoDocType) {
-//   await todoService.updateTodo(todo);
-
-//   cancelForm();
-// }
-
-// async function updateTodo(todo: TodoDocType) {
-//   await todoApi.updateTodo(todo);
-
-//   cancelForm();
-// }
 
 async function updateTodo(todo: TodoDocType) {
-  await todoApi.updateTodo(todo.id, {
-    title: todo.title,
-    description: todo.description,
-    completed: todo.completed,
-  });
-
-  await loadTodos();
+  await todoService.updateTodo(todo);
 
   cancelForm();
 }
 
-// async function deleteTodo(id: string) {
-//   await todoService.deleteTodo(id);
-// }
-
-async function deleteTodo(id: string) {
-  await todoApi.deleteTodo(id);
-
-  await loadTodos();
+async function deleteTodo(todo: TodoDocType) {
+  await todoService.deleteTodo(todo);
 }
 
-// async function toggleComplete(id: string) {
-//   await todoService.toggleComplete(id);
-// }
-
 async function toggleComplete(todo: TodoDocType) {
-  await todoApi.updateTodo(todo.id, {
-    completed: !todo.completed,
-  });
-
-  await loadTodos();
+  await todoService.toggleComplete(todo);
 }
 
 function editTodo(todo: TodoDocType) {
@@ -188,20 +138,13 @@ function cancelForm() {
   showForm.value = false;
 }
 
-// async function saveTodo(todo: TodoDocType | Omit<TodoDocType, "id">) {
-//   console.log("saveTodo()", todo);
+async function saveTodo(todo: TodoDocType | CreateTodoDto) {
+  console.log("saveTodo()", todo);
 
-//   if (editingTodo.value) {
-//     await updateTodo(todo as TodoDocType);
-//   } else {
-//     await addTodo(todo as Omit<TodoDocType, "id">);
-//   }
-// }
-async function saveTodo(todo: TodoDocType | Omit<TodoDocType, "id">) {
   if (editingTodo.value) {
     await updateTodo(todo as TodoDocType);
   } else {
-    await addTodo(todo as Omit<TodoDocType, "id">);
+    await addTodo(todo as CreateTodoDto);
   }
 }
 </script>

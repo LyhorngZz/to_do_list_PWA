@@ -18,7 +18,7 @@
       <div class="flex justify-end gap-3">
         <button
           type="button"
-          class="rounded-xl border border-slate-300 px-5 py-2 hover:bg-slate-100"
+          class="rounded-xl border border-slate-300 px-5 py-2 hover:bg-red-400 cursor-pointer"
           @click="emit('cancel')"
         >
           Cancel
@@ -26,7 +26,7 @@
 
         <button
           type="button"
-          class="rounded-xl bg-blue-600 px-5 py-2 text-white hover:bg-blue-700"
+          class="rounded-xl bg-blue-600 px-5 py-2 text-white hover:bg-blue-900 cursor-pointer"
           @click="submit"
         >
           {{ todo ? "Update" : "Save" }}
@@ -39,13 +39,14 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import type { TodoDocType } from "@/database/schemas/todo.schema";
+import type { CreateTodoDto } from "@/types/create-todo.dto";
 
 const props = defineProps<{
   todo?: TodoDocType | null;
 }>();
 
 const emit = defineEmits<{
-  (e: "save", todo: TodoDocType | Omit<TodoDocType, "id">): void;
+  (e: "save", todo: TodoDocType | CreateTodoDto): void;
   (e: "cancel"): void;
 }>();
 
@@ -83,11 +84,6 @@ function submit() {
     emit("save", {
       title: title.value,
       description: description.value,
-      completed: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      syncStatus: "pending",
-      deleted: false,
     });
   }
 
