@@ -14,5 +14,5 @@ onMounted(async () => {
 </script>
 
 <template>
-  <h1>Todo Offline App</h1>
+  <RouterView />
 </template>
