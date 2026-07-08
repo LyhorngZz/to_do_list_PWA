@@ -23,7 +23,14 @@ export class TodosService {
           ...dto,
           user,
       });
+      console.log('Node:', new Date().toISOString());
 
+      const now = await this.todoRepository.query(`
+      SELECT NOW()
+      `);
+
+      console.log(now);
+      
       return this.todoRepository.save(todo);
   }
 
