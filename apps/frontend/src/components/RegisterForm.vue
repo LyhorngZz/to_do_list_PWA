@@ -7,6 +7,7 @@
 
       <input
         v-model="username"
+        :disabled="loading"
         type="text"
         placeholder="John Doe"
         class="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
@@ -20,6 +21,7 @@
 
       <input
         v-model="email"
+        :disabled="loading"
         type="email"
         placeholder="you@example.com"
         class="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
@@ -33,6 +35,7 @@
 
       <input
         v-model="password"
+        :disabled="loading"
         type="password"
         placeholder="••••••••"
         class="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
@@ -46,17 +49,54 @@
 
       <input
         v-model="confirmPassword"
+        :disabled="loading"
         type="password"
         placeholder="••••••••"
         class="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
       />
     </div>
 
-    <button
-        type="submit"
-        class="w-full rounded-xl bg-blue-600 py-3 font-semibold text-white transition hover:bg-blue-700"
+    <p
+      v-if="successMessage"
+      class="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-green-600"
     >
-      Register
+      {{ successMessage }}
+    </p>
+
+    <p
+      v-if="errorMessage"
+      class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-600"
+    >
+      {{ errorMessage }}
+    </p>
+
+    <button
+      type="submit"
+      :disabled="loading"
+      class="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed"
+    >
+      <svg
+        v-if="loading"
+        class="h-5 w-5 animate-spin"
+        viewBox="0 0 24 24"
+        fill="none"
+      >
+        <circle
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          stroke-width="4"
+          opacity="0.25"
+        />
+        <path
+          d="M22 12a10 10 0 0 1-10 10"
+          stroke="currentColor"
+          stroke-width="4"
+        />
+      </svg>
+
+      {{ loading ? "Registering..." : "Register" }}
     </button>
 
     <p class="text-center text-sm text-slate-500">
@@ -64,6 +104,7 @@
 
       <button
         type="button"
+        :disabled="loading"
         class="font-semibold text-blue-600 hover:underline"
         @click="$emit('switch')"
       >
@@ -75,36 +116,40 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { useRouter } from "vue-router";
-import { useAuthStore } from "@/stores/auth";
+import authService from "@/services/auth.service";
 
-defineEmits(["switch"]);
-
-const router = useRouter();
-const authStore = useAuthStore();
+const emit = defineEmits(["switch"]);
 
 const username = ref("");
 const email = ref("");
 const password = ref("");
 const confirmPassword = ref("");
+const errorMessage = ref("");
+const successMessage = ref("");
+const loading = ref(false);
 
-function register() {
-  if (
-    !username.value.trim() ||
-    !email.value.trim() ||
-    !password.value.trim() ||
-    !confirmPassword.value.trim()
-  ) {
-    alert("Please fill in all fields.");
-    return;
+async function register() {
+  errorMessage.value = "";
+  successMessage.value = "";
+  loading.value = true;
+  try {
+    await authService.register(
+      username.value,
+      email.value,
+      password.value
+    );
+
+    successMessage.value = "Registration successful. Please login.";
+
+    setTimeout(() => {
+      emit("switch");
+    }, 1500);
+
+  } catch (error: any) {
+    errorMessage.value =
+      error.response?.data?.message || "Registration failed.";
+  }finally{
+    loading.value = false;
   }
-
-  if (password.value !== confirmPassword.value) {
-    alert("Passwords do not match.");
-    return;
-  }
-
-  authStore.login();
-  router.push("/todos");
 }
 </script>

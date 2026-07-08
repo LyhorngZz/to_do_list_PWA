@@ -1,18 +1,20 @@
-<script setup lang="ts">
-import { onMounted } from 'vue';
-import api from './services/api';
-
-onMounted(async () => {
-  try {
-    const response = await api.get('/');
-
-    console.log(response.data);
-  } catch (err) {
-    console.error(err);
-  }
-});
-</script>
-
 <template>
   <RouterView />
 </template>
+
+<script setup lang="ts">
+import { onMounted, onUnmounted } from "vue";
+import syncService from "@/services/sync.service";
+
+const handleOnline = () => {
+    syncService.sync();
+};
+
+onMounted(() => {
+    window.addEventListener("online", handleOnline);
+});
+
+onUnmounted(() => {
+    window.removeEventListener("online", handleOnline);
+});
+</script>

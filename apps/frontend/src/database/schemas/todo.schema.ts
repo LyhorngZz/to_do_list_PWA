@@ -5,12 +5,10 @@ export interface TodoDocType {
     title: string;
     description: string;
     completed: boolean;
+    deleted: boolean;
 
     createdAt: string;
     updatedAt: string;
-
-    syncStatus: "pending" | "synced";
-    deleted: boolean;
 }
 
 export const todoSchema: RxJsonSchema<TodoDocType> = {
@@ -39,6 +37,11 @@ export const todoSchema: RxJsonSchema<TodoDocType> = {
             default: false,
         },
 
+        deleted: {
+            type: "boolean",
+            default: false,
+        },
+
         createdAt: {
             type: "string",
             format: "date-time",
@@ -48,17 +51,6 @@ export const todoSchema: RxJsonSchema<TodoDocType> = {
             type: "string",
             format: "date-time",
         },
-
-        syncStatus: {
-            type: "string",
-            enum: ["pending", "synced"],
-            default: "pending",
-        },
-
-        deleted: {
-            type: "boolean",
-            default: false,
-        },
     },
 
     required: [
@@ -66,9 +58,8 @@ export const todoSchema: RxJsonSchema<TodoDocType> = {
         "title",
         "description",
         "completed",
+        "deleted",
         "createdAt",
         "updatedAt",
-        "syncStatus",
-        "deleted",
     ],
 };
