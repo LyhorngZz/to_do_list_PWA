@@ -78,6 +78,7 @@ import TodoForm from "@/components/TodoForm.vue";
 import type { TodoDocType } from "@/database/schemas/todo.schema";
 import todoService from "@/services/todo.service";
 import type { CreateTodoDto } from "@/types/create-todo.dto";
+import syncService from "@/services/sync.service";
 
 const todos = ref<TodoDocType[]>([]);
 
@@ -87,13 +88,17 @@ const editingTodo = ref<TodoDocType | null>(null);
 let subscription: Subscription | undefined;
 
 onMounted(async () => {
-    await todoService.initialize();
-
     subscription = todoService
         .getTodoStream()
         .subscribe((docs) => {
             todos.value = docs.map(doc => doc.toJSON());
         });
+
+    try {
+        await syncService.initialize();
+    } catch (error) {
+        console.error(error);
+    }
 });
 
 onUnmounted(() => {
@@ -101,26 +106,35 @@ onUnmounted(() => {
 });
 
 async function addTodo(todo: CreateTodoDto) {
-  await todoService.addTodo(
-    todo.title,
-    todo.description
-  );
+    try {
+        await todoService.addTodo(
+            todo.title,
+            todo.description,
+        );
 
-  cancelForm();
+        syncService.sync();
+    } finally {
+        cancelForm();
+    }
 }
 
 async function updateTodo(todo: TodoDocType) {
-  await todoService.updateTodo(todo);
-
-  cancelForm();
+  try{
+    await todoService.updateTodo(todo);
+    syncService.sync();
+  }finally{
+    cancelForm();
+  }
 }
 
 async function deleteTodo(todo: TodoDocType) {
   await todoService.deleteTodo(todo);
+  syncService.sync();
 }
 
 async function toggleComplete(todo: TodoDocType) {
   await todoService.toggleComplete(todo);
+  syncService.sync();
 }
 
 function editTodo(todo: TodoDocType) {
@@ -139,7 +153,6 @@ function cancelForm() {
 }
 
 async function saveTodo(todo: TodoDocType | CreateTodoDto) {
-  console.log("saveTodo()", todo);
 
   if (editingTodo.value) {
     await updateTodo(todo as TodoDocType);

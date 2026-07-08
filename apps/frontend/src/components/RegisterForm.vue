@@ -7,6 +7,7 @@
 
       <input
         v-model="username"
+        :disabled="loading"
         type="text"
         placeholder="John Doe"
         class="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
@@ -20,6 +21,7 @@
 
       <input
         v-model="email"
+        :disabled="loading"
         type="email"
         placeholder="you@example.com"
         class="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
@@ -33,6 +35,7 @@
 
       <input
         v-model="password"
+        :disabled="loading"
         type="password"
         placeholder="••••••••"
         class="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
@@ -46,6 +49,7 @@
 
       <input
         v-model="confirmPassword"
+        :disabled="loading"
         type="password"
         placeholder="••••••••"
         class="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
@@ -67,10 +71,32 @@
     </p>
 
     <button
-        type="submit"
-        class="w-full rounded-xl bg-blue-600 py-3 font-semibold text-white transition hover:bg-blue-700"
+      type="submit"
+      :disabled="loading"
+      class="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed"
     >
-      Register
+      <svg
+        v-if="loading"
+        class="h-5 w-5 animate-spin"
+        viewBox="0 0 24 24"
+        fill="none"
+      >
+        <circle
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          stroke-width="4"
+          opacity="0.25"
+        />
+        <path
+          d="M22 12a10 10 0 0 1-10 10"
+          stroke="currentColor"
+          stroke-width="4"
+        />
+      </svg>
+
+      {{ loading ? "Registering..." : "Register" }}
     </button>
 
     <p class="text-center text-sm text-slate-500">
@@ -78,6 +104,7 @@
 
       <button
         type="button"
+        :disabled="loading"
         class="font-semibold text-blue-600 hover:underline"
         @click="$emit('switch')"
       >
@@ -99,8 +126,12 @@ const password = ref("");
 const confirmPassword = ref("");
 const errorMessage = ref("");
 const successMessage = ref("");
+const loading = ref(false);
 
 async function register() {
+  errorMessage.value = "";
+  successMessage.value = "";
+  loading.value = true;
   try {
     await authService.register(
       username.value,
@@ -117,6 +148,8 @@ async function register() {
   } catch (error: any) {
     errorMessage.value =
       error.response?.data?.message || "Registration failed.";
+  }finally{
+    loading.value = false;
   }
 }
 </script>

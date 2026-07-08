@@ -1,13 +1,35 @@
 import api from "./api";
 
-export default {
-    pull(lastPulledAt: number) {
-        return api.get("/sync/pull", {
-            params: { lastPulledAt },
-        });
-    },
+import type {
+    PullResponse,
+    PushChanges,
+    PushRequest,
+    PushResponse,
+} from "@/types/sync";
 
-    push(payload: any) {
-        return api.post("/sync/push", payload);
-    },
-};
+class SyncApi {
+    async pull(
+        lastPulledAt: string | null,
+    ): Promise<PullResponse> {
+        const { data } = await api.get<PullResponse>(
+            "/sync/pull",
+            {
+                params: {
+                    lastPulledAt,
+                },
+            },
+        );
+
+        return data;
+    }
+
+    async push(
+        changes: PushChanges,
+    ): Promise<void> {
+        await api.post("/sync/push", {
+            changes,
+        });
+    }
+}
+
+export default new SyncApi();

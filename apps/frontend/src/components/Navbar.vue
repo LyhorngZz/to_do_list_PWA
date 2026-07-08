@@ -34,7 +34,11 @@ import { useAuthStore } from "@/stores/auth";
 const router = useRouter();
 const authStore = useAuthStore();
 
-function logout() {
+import todoService from "@/services/todo.service";
+
+async function logout() {
+    await todoService.clearLocalData();
+
     authStore.logout();
 
     router.push("/login");

@@ -6,7 +6,7 @@ export interface SyncQueueDocType {
     documentId: string;
 
     // Collection name (future-proof)
-    collection: "todos";
+    collectionName: "todos";
 
     // What happened
     operation: "create" | "update" | "delete";
@@ -28,7 +28,7 @@ export const syncQueueSchema: RxJsonSchema<SyncQueueDocType> = {
             maxLength: 100,
         },
 
-        collection: {
+        collectionName: {
             type: "string",
             enum: ["todos"],
         },
@@ -50,7 +50,7 @@ export const syncQueueSchema: RxJsonSchema<SyncQueueDocType> = {
 
     required: [
         "documentId",
-        "collection",
+        "collectionName",
         "operation",
         "timestamp",
     ],
