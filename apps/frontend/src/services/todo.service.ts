@@ -71,39 +71,49 @@ class TodoService {
         });
     }
 
+    // async initialize() {
+    //     if (!navigator.onLine) {
+    //         console.log("Offline: Using local IndexedDB");
+    //         return;
+    //     }
+
+    //     try {
+    //         console.log("Downloading todos from backend...");
+
+    //         // Later replace with syncService.pull()
+    //         const serverTodos = await todoApi.getTodos();
+
+    //         await this.clearLocalData();
+
+    //         // Insert backend todos
+    //         for (const todo of serverTodos) {
+    //             await db.todos.insert({
+    //                 id: todo.id,
+    //                 title: todo.title,
+    //                 description: todo.description,
+    //                 completed: todo.completed,
+
+    //                 createdAt: new Date(todo.createdAt).toISOString(),
+    //                 updatedAt: new Date(todo.updatedAt).toISOString(),
+
+    //                 deleted: false,
+    //             });
+    //         }
+
+    //         console.log("Initial sync completed.");
+    //     } catch (error) {
+    //         console.error("Initial sync failed:", error);
+    //     }
+    // }
+
     async initialize() {
         if (!navigator.onLine) {
-            console.log("Offline: Using local IndexedDB");
+            console.log("Offline mode");
             return;
         }
 
-        try {
-            console.log("Downloading todos from backend...");
-
-            // Later replace with syncService.pull()
-            const serverTodos = await todoApi.getTodos();
-
-            await this.clearLocalData();
-
-            // Insert backend todos
-            for (const todo of serverTodos) {
-                await db.todos.insert({
-                    id: todo.id,
-                    title: todo.title,
-                    description: todo.description,
-                    completed: todo.completed,
-
-                    createdAt: new Date(todo.createdAt).toISOString(),
-                    updatedAt: new Date(todo.updatedAt).toISOString(),
-
-                    deleted: false,
-                });
-            }
-
-            console.log("Initial sync completed.");
-        } catch (error) {
-            console.error("Initial sync failed:", error);
-        }
+        console.log("Online mode");
+        // Sync will be implemented later.
     }
 
     async clearLocalData() {

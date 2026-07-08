@@ -35,7 +35,7 @@
 
     <button
         type="submit"
-        class="w-full rounded-xl bg-blue-600 py-3 font-semibold text-white transition hover:bg-blue-700"
+        class="w-full rounded-xl bg-blue-600 py-3 font-semibold text-white transition hover:bg-blue-900 cursor-pointer"
     >
       Login
     </button>
