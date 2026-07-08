@@ -2,15 +2,17 @@
   <div class="min-h-screen bg-slate-100">
     <Navbar />
 
-    <main class="mx-auto max-w-6xl px-6 py-10">
+    <main class="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
       <!-- Header -->
-      <div class="mb-8 flex items-center justify-between">
+      <div
+        class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+      >
         <div>
-          <h1 class="text-4xl font-bold text-slate-800">
+          <h1 class="text-3xl font-bold text-slate-800 sm:text-4xl">
             My To-Do List
           </h1>
 
-          <p class="mt-2 text-slate-500">
+          <p class="mt-2 text-sm text-slate-500 sm:text-base">
             Stay organized and get things done.
           </p>
         </div>
@@ -37,13 +39,13 @@
       <!-- Todo Card List -->
       <div
         v-if="todos.length === 0"
-        class="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 bg-white px-6 py-16 text-center"
+        class="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 bg-white px-4 py-10 text-center"
       >
-        <h2 class="text-xl font-semibold text-slate-800">
+        <h2 class="text-lg sm:text-xl font-semibold text-slate-800">
             No tasks yet
         </h2>
 
-        <p class="mt-2 max-w-sm text-slate-500">
+        <p class="mt-2 max-w-sm text-slate-500 sm:text-base">
             You don't have any tasks yet. Click
             <span class="font-medium text-blue-600">"Add Task"</span>
             to create your first todo.
@@ -52,7 +54,7 @@
 
       <div
         v-else
-        class="space-y-3"
+        class="space-y-4"
       >
         <TodoCard
             v-for="todo in todos"
