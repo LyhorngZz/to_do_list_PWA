@@ -24,8 +24,6 @@ import { syncModule } from './modules/sync/sync.module';
       autoLoadEntities: true,
 
       synchronize: true,
-
-      logging: ['query']
     }),
     UsersModule, AuthModule, TodosModule, syncModule
   ],
