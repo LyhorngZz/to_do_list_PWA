@@ -3,8 +3,6 @@ import api from "./api";
 import type {
     PullResponse,
     PushChanges,
-    PushRequest,
-    PushResponse,
 } from "@/types/sync";
 
 class SyncApi {

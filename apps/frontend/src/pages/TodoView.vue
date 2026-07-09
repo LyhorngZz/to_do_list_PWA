@@ -1,8 +1,10 @@
 <template>
   <div class="min-h-screen bg-slate-100">
-    <Navbar />
+    <div class="fixed top-0 left-0 right-0 z-50 bg-white">
+      <Navbar />
+    </div>
 
-    <main class="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
+    <main class="mx-auto max-w-6xl px-4 pt-24 pb-6 sm:px-6 sm:pt-24 sm:pb-8 lg:px-8 lg:pt-24 lg:pb-10">
       <!-- Header -->
       <div
         class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"

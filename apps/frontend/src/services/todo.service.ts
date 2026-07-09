@@ -10,7 +10,6 @@ class TodoService {
 
         const existing = await queue.findOne(documentId).exec();
 
-        // No existing queue item
         if (!existing) {
             await queue.insert({
                 documentId,
@@ -26,12 +25,9 @@ class TodoService {
             case "create":
                 switch (operation) {
                     case "update":
-                        // Still a create because the backend doesn't know about it yet.
                         return;
 
                     case "delete":
-                        // Created then deleted before syncing.
-                        // Nothing needs to be sent.
                         await existing.remove();
                         return;
 
@@ -42,11 +38,9 @@ class TodoService {
             case "update":
                 switch (operation) {
                     case "update":
-                        // Already pending update.
                         return;
 
                     case "delete":
-                        // Update becomes delete.
                         await existing.incrementalPatch({
                             operation: "delete",
                             timestamp: new Date().toISOString(),
@@ -59,11 +53,9 @@ class TodoService {
                 break;
 
             case "delete":
-                // Ignore any further changes after delete.
                 return;
         }
 
-        // Fallback
         await existing.incrementalPatch({
             operation,
             timestamp: new Date().toISOString(),

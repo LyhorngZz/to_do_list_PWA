@@ -2,16 +2,12 @@ import type { RxJsonSchema } from "rxdb";
 
 export interface SyncQueueDocType {
 
-    // Todo id
     documentId: string;
 
-    // Collection name (future-proof)
     collectionName: "todos";
 
-    // What happened
     operation: "create" | "update" | "delete";
 
-    // When this operation happened
     timestamp: string;
 }
 
