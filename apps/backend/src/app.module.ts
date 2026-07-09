@@ -12,6 +12,7 @@ import { syncModule } from './modules/sync/sync.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: '.env',
     }),
 
     TypeOrmModule.forRoot({

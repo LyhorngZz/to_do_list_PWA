@@ -35,4 +35,9 @@ export class AuthController {
     return user;
   }
 
+  @Post('telegram')
+  async telegramLogin(@Body('initData') initData: string) {
+    return this.authService.loginWithTelegram(initData);
+  }
+
 }

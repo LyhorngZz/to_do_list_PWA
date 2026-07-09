@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   Injectable,
   ConflictException,
@@ -5,6 +6,7 @@ import {
 } from '@nestjs/common';
 
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 
 import { RegisterDto } from './dto/register.dto';
 import { UsersService } from '../users/users.service';
@@ -77,6 +79,58 @@ export class AuthService {
       access_token: await this.jwtService.signAsync(
         payload,
       ),
+    };
+  }
+
+  async loginWithTelegram(initData: string) {
+    const params = new URLSearchParams(initData);
+    const hash = params.get('hash');
+    params.delete('hash');
+
+    const dataCheckString = [...params.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([k, v]) => `${k}=${v}`)
+      .join('\n');
+
+    const botToken = process.env.TELEGRAM_BOT_TOKEN;
+    if (!botToken) {
+      throw new Error('TELEGRAM_BOT_TOKEN is not set');
+    }
+
+    const secretKey = crypto
+      .createHmac('sha256', 'WebAppData')
+      .update(botToken)
+      .digest();
+
+    const computedHash = crypto
+      .createHmac('sha256', secretKey)
+      .update(dataCheckString)
+      .digest('hex');
+
+    if (computedHash !== hash) {
+      throw new UnauthorizedException('Invalid Telegram data');
+    }
+
+    const userParam = params.get('user');
+    if (!userParam) {
+      throw new UnauthorizedException('Missing Telegram user data');
+    }
+
+    const tgUser = JSON.parse(userParam);
+
+    let user = await this.usersService.findByTelegramId(String(tgUser.id));
+    if (!user) {
+      user = await this.usersService.createFromTelegram(String(tgUser.id));
+    }
+
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      username: user.username,
+    };
+
+    return {
+      access_token: await this.jwtService.signAsync(payload),
     };
   }
 
