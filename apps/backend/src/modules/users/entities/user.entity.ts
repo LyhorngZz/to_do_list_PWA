@@ -7,11 +7,11 @@ export class User {
   id: string;
 
   @Column({
-    unique: true
+    unique: true, nullable: true
   })
   email: string;
 
-  @Column()
+  @Column({ nullable: true })
   password: string;
 
 
@@ -27,4 +27,7 @@ export class User {
     name: 'updated_at'
   })
   updatedAt: Date;
+
+  @Column({ unique: true, nullable: true })
+  telegramId: string;
 }

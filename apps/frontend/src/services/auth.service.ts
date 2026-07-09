@@ -24,6 +24,18 @@ class AuthService {
         const response = await api.get("/auth/profile");
         return response.data;
     }
+
+    async loginWithTelegram(): Promise<string | null> {
+        const tg = (window.Telegram as any)?.WebApp as { initData?: string } | undefined;
+        if (!tg?.initData) return null;
+
+        const { data } = await api.post("/auth/telegram", {
+            initData: tg.initData,
+        });
+
+        localStorage.setItem("accessToken", data.access_token);
+        return data.access_token;
+    }
 }
 
 export default new AuthService();

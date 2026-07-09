@@ -23,4 +23,12 @@ export class UsersService {
     return this.userRepository.save(newUser);
   }
 
+  async findByTelegramId(telegramId: string) {
+    return this.userRepository.findOne({ where: { telegramId } });
+  }
+
+  async createFromTelegram(telegramId: string) {
+    return this.create({ telegramId });
+  }
+
 }
