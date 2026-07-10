@@ -5,16 +5,26 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from "vue";
 import syncService from "@/services/sync.service";
+import { useAuthStore } from "./stores/auth";
+import { startHeartbeat, stopHeartbeat } from "./composables/useHeartbeat";
 
-const handleOnline = () => {
-    syncService.sync();
+const authStore = useAuthStore();
+
+const handleOnline = async () => {
+    await syncService.sync();
 };
 
 onMounted(() => {
     window.addEventListener("online", handleOnline);
+
+    if(authStore.isAuthenticated){
+        startHeartbeat();
+    }
 });
 
 onUnmounted(() => {
     window.removeEventListener("online", handleOnline);
+
+    stopHeartbeat();
 });
 </script>

@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import AuthView from '@/pages/AuthView.vue'
 import TodoView from '@/pages/TodoView.vue'
 import { useAuthStore } from '@/stores/auth';
+import SettingsView from '@/pages/SettingsView.vue';
+import GuestForm from '@/components/GuestForm.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -15,16 +17,22 @@ const router = createRouter({
       name: 'login',
       component: AuthView,
       meta: {
-        guest: true,
+        guestOnly: true,
       }
+    },
+    {
+      path: "/guest",
+      component: GuestForm,
     },
     {
       path: "/todos",
       name: 'todos',
       component: TodoView,
-      meta: {
-        requiresAuth: true,
-      }
+    },
+    {
+      path: "/settings",
+      name: "Settings",
+      component: SettingsView,
     },
   ],
 });
@@ -32,11 +40,7 @@ const router = createRouter({
 router.beforeEach((to) => {
   const authStore = useAuthStore();
 
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    return "/login";
-  }
-
-  if (to.meta.guest && authStore.isAuthenticated) {
+  if (to.meta.guestOnly && authStore.isAuthenticated) {
     return "/todos";
   }
 });

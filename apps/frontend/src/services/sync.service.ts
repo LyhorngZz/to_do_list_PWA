@@ -8,6 +8,10 @@ import todoService from "./todo.service";
 class SyncService {
 
     async initialize() {
+
+        if (!localStorage.getItem("accessToken")) {
+            return;
+        }
         await this.sync();
     }
 

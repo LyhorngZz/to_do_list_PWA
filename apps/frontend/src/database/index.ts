@@ -6,6 +6,7 @@ import { todoSchema } from "./schemas/todo.schema";
 import type { AppDatabase } from "./types";
 import { syncQueueSchema } from "./schemas/sync-queue.schema";
 import { syncMetaSchema } from "./schemas/sync-meta.schema";
+import { profileSchema } from "./schemas/profile.schema"
 
 export const db: AppDatabase = await createRxDatabase({
     name: "todo-pwa",
@@ -23,6 +24,9 @@ await db.addCollections({
     },
     syncMeta: {
         schema: syncMetaSchema,
+    },
+    profile: {
+        schema: profileSchema,
     },
 });
 

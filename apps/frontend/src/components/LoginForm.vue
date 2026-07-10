@@ -84,6 +84,9 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import authService from "@/services/auth.service";
+import { startHeartbeat } from "@/composables/useHeartbeat";
+import profileService from "@/services/profile.service";
+import syncService from "@/services/sync.service";
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -96,6 +99,7 @@ const loading = ref(false);
 async function login() {
   errorMessage.value = "";
   loading.value = true;
+
   try {
     const result = await authService.login(
       email.value,
@@ -104,7 +108,24 @@ async function login() {
 
     authStore.login(result.access_token);
 
-    router.push("/todos");
+    const user = await authService.profile();
+
+    console.log("Profile from backend:", user);
+
+    await profileService.updateProfile({
+      username: user.username,
+      email: user.email,
+      isGuest: false,
+    });
+
+    const localProfile = await profileService.getProfile();
+    console.log("Local profile: ", localProfile?.toJSON());
+
+    await syncService.sync();
+
+    startHeartbeat();
+
+    router.push('/todos');
   } catch (error) {
     console.error(error);
     const apiMessage = (error as any)?.response?.data?.message;

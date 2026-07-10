@@ -115,8 +115,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import authService from "@/services/auth.service";
+import profileService from "@/services/profile.service";
 
 const emit = defineEmits(["switch"]);
 
@@ -128,11 +129,26 @@ const errorMessage = ref("");
 const successMessage = ref("");
 const loading = ref(false);
 
+onMounted(async () => {
+  const profile = await profileService.getProfile();
+
+  if(profile?.isGuest){
+    username.value = profile.username;
+  }
+});
+
 async function register() {
   errorMessage.value = "";
   successMessage.value = "";
   loading.value = true;
   try {
+
+    if (password.value !== confirmPassword.value) {
+        errorMessage.value = "Passwords do not match.";
+        loading.value = false;
+        return;
+    }
+    
     await authService.register(
       username.value,
       email.value,

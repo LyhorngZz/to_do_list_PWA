@@ -15,7 +15,7 @@
 
         <p class="mt-2 text-slate-500">
           {{
-            isLogin
+            mode === "login"
               ? "Sign in to continue."
               : "Create your account."
           }}
@@ -23,22 +23,44 @@
       </div>
 
       <LoginForm
-        v-if="isLogin"
-        @switch="isLogin = false"
+        v-if="mode === 'login'"
+        @switch="mode = 'register'"
       />
 
       <RegisterForm
-        v-else
-        @switch="isLogin = true"
+        v-else-if="mode === 'register'"
+        @switch="mode = 'login'"
       />
+
+      <div
+          v-if="showGuestButton"
+          class="mt-6 border-t pt-6"
+      >
+          <button
+              @click="router.push('/guest')"
+              class="w-full rounded-xl border border-slate-300 py-3 font-medium text-slate-700 transition hover:bg-blue-200"
+          >
+              Continue as Guest
+          </button>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import LoginForm from "@/components/LoginForm.vue";
 import RegisterForm from "@/components/RegisterForm.vue";
+import { useRoute, useRouter } from "vue-router";
 
-const isLogin = ref(true);
+const router = useRouter();
+const route = useRoute();
+
+const mode = ref<"login" | "register">(
+    route.query.mode === "register" ? "register" : "login"
+);
+
+const showGuestButton = computed(() => {
+    return route.query.from !== "settings";
+});
 </script>
