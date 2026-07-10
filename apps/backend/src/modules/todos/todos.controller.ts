@@ -6,8 +6,9 @@ import { User } from "../users/entities/user.entity";
 import { JwtAuthGuard } from "src/common/guards/jwt-auth.guard";
 import { stringify } from "querystring";
 import { UpdateTodoDto } from "./dto/update-todo.dto";
+import { DeviceGuard } from "src/common/guards/device.guard";
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, DeviceGuard)
 @Controller('todos')
 export class TodosController{
 

@@ -27,4 +27,33 @@ export class User {
     name: 'updated_at'
   })
   updatedAt: Date;
+
+
+  // ==========================
+
+  @Column({
+    type: 'varchar',
+    nullable: true,
+  })
+  currentDeviceId: string | null;
+
+  @Column({
+    default: false,
+  })
+  isLoggedIn: boolean;
+
+  @Column({
+    type: 'timestamp',
+    nullable: true,
+  })
+  lastSeen: Date | null;
+
+  @Column({
+    type: 'varchar',
+    nullable: true,
+  })
+  pin: string | null;
+
+  
+
 }
