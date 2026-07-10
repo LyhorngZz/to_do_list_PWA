@@ -37,7 +37,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard, DeviceGuard)
-  @Post('hearthbeat')
+  @Post('heartbeat')
   hearthbeat(@GetUser() user: User, @Headers('x-device-id') deviceId: string ){
     return this.authService.heartbeat(user, deviceId);
   }
