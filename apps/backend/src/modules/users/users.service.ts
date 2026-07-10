@@ -23,4 +23,14 @@ export class UsersService {
     return this.userRepository.save(newUser);
   }
 
+  async save(user: User){
+    return this.userRepository.save(user);
+  }
+
+  async findById(id: string) {
+    return this.userRepository.findOne({
+      where: { id },
+    });
+  }
+
 }
