@@ -2,6 +2,7 @@ import {
   Injectable,
   ConflictException,
   UnauthorizedException,
+  BadRequestException,
 } from '@nestjs/common';
 
 import * as bcrypt from 'bcrypt';
@@ -10,6 +11,8 @@ import { RegisterDto } from './dto/register.dto';
 import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
+import { User } from '../users/entities/user.entity';
+import { VerifyPinDto } from './dto/verify-pin.dto';
 
 @Injectable()
 export class AuthService {
@@ -67,6 +70,25 @@ export class AuthService {
       );
     }
 
+    if(user.isLoggedIn && user.currentDeviceId !== loginDto.deviceId) {
+      throw new UnauthorizedException(
+        'This account is already logged in on another device.'
+      )
+    }
+
+    user.isLoggedIn = true;
+    user.currentDeviceId = loginDto.deviceId;
+    user.lastSeen = new Date();
+
+    await this.usersService.save(user);
+
+    console.log('========================== login LOGIN SAVE', {
+      pin: user.pin,
+      isLoggedIn: user.isLoggedIn,
+      currentDeviceId: user.currentDeviceId,
+    });
+    await this.usersService.save(user);
+
     const payload = {
       sub: user.id,
       email: user.email,
@@ -77,7 +99,63 @@ export class AuthService {
       access_token: await this.jwtService.signAsync(
         payload,
       ),
+      requiresPinSetup: user.pin === null,
     };
   }
+
+  async heartbeat(
+    user: User,
+    deviceId: string,
+  ) {
+
+    if (
+      user.currentDeviceId !== deviceId
+    ) {
+      throw new UnauthorizedException(
+        'Invalid device.',
+      );
+    }
+
+    user.lastSeen = new Date();
+
+    await this.usersService.save(user);
+    console.log('========================== heart beat LOGIN SAVE', {
+      pin: user.pin,
+      isLoggedIn: user.isLoggedIn,
+      currentDeviceId: user.currentDeviceId,
+    });
+    await this.usersService.save(user);
+    return {
+      success: true,
+    };
+  }
+
+
+  async verifyPin(
+    user: User,
+    dto: VerifyPinDto,
+  ) {
+    if (!user.pin) {
+      throw new BadRequestException(
+        'PIN has not been set.',
+      );
+    }
+
+    const isMatch = await bcrypt.compare(
+      dto.pin,
+      user.pin,
+    );
+
+    if (!isMatch) {
+      throw new UnauthorizedException(
+        'Invalid PIN.',
+      );
+    }
+
+    return {
+      message: 'PIN verified successfully.',
+    };
+  }
+
 
 }
