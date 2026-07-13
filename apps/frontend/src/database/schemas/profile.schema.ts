@@ -27,6 +27,15 @@ export const profileSchemaLiteral = {
             type: "boolean",
         },
 
+        hasPin: {
+            type: "boolean",
+            default: false,
+        },
+
+        pinHash: {
+            type: "string",
+        },
+
         createdAt: {
             type: "string",
             format: "date-time",
@@ -43,6 +52,8 @@ export const profileSchemaLiteral = {
         "username",
         "email",
         "isGuest",
+        "hasPin",
+        "pinHash",
         "createdAt",
         "updatedAt",
     ],

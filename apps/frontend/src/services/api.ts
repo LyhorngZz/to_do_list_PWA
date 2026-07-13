@@ -1,3 +1,4 @@
+import { getDeviceId } from "@/utils/device";
 import axios from "axios";
 
 const api = axios.create({
@@ -13,6 +14,8 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
+  config.headers["x-device-id"] = getDeviceId();
 
   return config;
 });

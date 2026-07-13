@@ -21,6 +21,8 @@ class ProfileService {
             username,
             email: "",
             isGuest: true,
+            hasPin: false,
+            pinHash: "",
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
         });
@@ -30,17 +32,25 @@ class ProfileService {
         username?: string;
         email?: string;
         isGuest?: boolean;
+        hasPin?: boolean;
+        pinHash: string;
     }) {
 
-        console.log("Updating profile with:", data);
-
-        const profile = await this.getProfile();
-
-        console.log("Current profile:", profile?.toJSON());
+        let profile = await this.getProfile();
 
         if (!profile) {
-            console.log("No profile found!");
-            return;
+            profile = await db.profile.insert({
+                id: "profile",
+                username: data.username ?? "",
+                email: data.email ?? "",
+                isGuest: data.isGuest ?? true,
+                hasPin: data.hasPin ?? false,
+                pinHash: data.pinHash ?? "",
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+            });
+
+            return profile;
         }
 
         await profile.incrementalPatch({
@@ -48,9 +58,7 @@ class ProfileService {
             updatedAt: new Date().toISOString(),
         });
 
-        const updated = await this.getProfile();
-
-        console.log(updated?.toJSON());
+        return profile;
     }
 
     async clearProfile() {

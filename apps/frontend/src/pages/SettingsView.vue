@@ -37,16 +37,124 @@
       </div>
 
       <!-- Security -->
-      <div class="mb-6 rounded-xl bg-white p-5 shadow">
+      <div
+        v-if="authStore.isAuthenticated"
+        class="mb-6 rounded-xl bg-white p-5 shadow"
+      >
         <h2 class="mb-4 text-lg font-semibold">
           Security
         </h2>
 
+        <div class="mb-5">
+          <p class="font-medium">
+            Passcode
+          </p>
+
+          <p class="mt-1 text-sm text-slate-500">
+            Protect your app with a 6-digit PIN. The PIN will be required whenever
+            the app is locked or reopened.
+          </p>
+        </div>
+
+        <div class="mb-5 flex items-center justify-between">
+
+          <span class="text-sm text-slate-500">
+            Status
+          </span>
+
+          <span
+            v-if="!profile?.hasPin"
+            class="rounded-full bg-slate-100 px-3 py-1 text-sm text-slate-600"
+          >
+            Not Configured
+          </span>
+
+          <span
+            v-else
+            class="rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-700"
+          >
+            ✓ Enabled
+          </span>
+
+        </div>
+
+        <p
+          v-if="successMessage"
+          class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
+        >
+          {{ successMessage }}
+        </p>
+
+        <p
+          v-if="errorMessage"
+          class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+        >
+          {{ errorMessage }}
+        </p>
+
+        <!-- Create -->
         <button
-          class="w-full rounded-lg border p-3 hover:bg-green-100 cursor-pointer"
+          v-if="!profile?.hasPin && !showCreatePin"
+          @click="showCreatePin = true"
+          class="w-full rounded-lg bg-blue-600 py-3 font-medium text-white transition hover:bg-blue-700"
         >
           Create Passcode
         </button>
+
+        <!-- Change -->
+        <button
+          v-else-if="profile?.hasPin"
+          class="w-full rounded-lg border py-3 transition hover:bg-slate-100"
+        >
+          Change Passcode
+        </button>
+
+        <!-- Create Form -->
+        <div
+          v-if="showCreatePin"
+          class="mt-5 space-y-4 border-t pt-5"
+        >
+
+          <input
+            v-model="pin"
+            maxlength="6"
+            @input="pin = pin.replace(/\D/g, '')"
+            type="password"
+            placeholder="Enter 6-digit PIN"
+            class="w-full rounded-lg border border-slate-300 px-4 py-3"
+          />
+
+          <input
+            v-model="confirmPin"
+            maxlength="6"
+            @input="pin = pin.replace(/\D/g, '')"
+            type="password"
+            placeholder="Confirm PIN"
+            class="w-full rounded-lg border border-slate-300 px-4 py-3"
+          />
+
+          <div class="flex gap-3">
+
+            <button
+              :disabled="loadingPin"
+              @click="createPin"
+              class="flex-1 rounded-lg bg-blue-600 py-3 font-medium text-white transition hover:bg-blue-700 disabled:bg-blue-300"
+            >
+              {{ loadingPin ? "Saving..." : "Save" }}
+            </button>
+
+            <button
+              :disabled="loadingPin"
+              @click="cancelCreatePin"
+              class="flex-1 rounded-lg border py-3 transition hover:bg-slate-100"
+            >
+              Cancel
+            </button>
+
+          </div>
+
+        </div>
+
       </div>
 
       <!-- Account -->
@@ -94,8 +202,18 @@ import { ArrowLeft } from "lucide-vue-next";
 
 import type { ProfileDocType } from "@/database/schemas/profile.schema";
 import todoService from "@/services/todo.service";
+import profileApi from "@/services/profile.api";
+import bcrypt from "bcryptjs";
 
 const profile = ref<ProfileDocType | null>(null);
+const showCreatePin = ref(false);
+const loadingPin = ref(false);
+
+const pin = ref("");
+const confirmPin = ref("");
+
+const successMessage = ref("");
+const errorMessage = ref("");
 
 const router = useRouter();
 
@@ -120,5 +238,69 @@ async function logout() {
 
 function goBack() {
     router.back();
+}
+
+function cancelCreatePin() {
+
+    showCreatePin.value = false;
+
+    pin.value = "";
+    confirmPin.value = "";
+
+    errorMessage.value = "";
+    successMessage.value = "";
+}
+
+async function createPin() {
+
+    successMessage.value = "";
+    errorMessage.value = "";
+
+    if (!/^\d{6}$/.test(pin.value)) {
+        errorMessage.value =
+            "PIN must contain exactly 6 digits.";
+        return;
+    }
+
+    if (pin.value !== confirmPin.value) {
+        errorMessage.value =
+            "PIN does not match.";
+        return;
+    }
+
+    loadingPin.value = true;
+
+    try {
+
+        await profileApi.createPin(pin.value);
+
+        const pinHash = await bcrypt.hash(pin.value, 10);
+
+        await profileService.updateProfile({
+            hasPin: true,
+            pinHash,
+        });
+
+        profile.value = await profileService.getProfile();
+
+        successMessage.value =
+            "Passcode created successfully.";
+
+        showCreatePin.value = false;
+        pin.value = "";
+        confirmPin.value = "";
+
+    } catch (error: any) {
+
+        errorMessage.value =
+            error.response?.data?.message ??
+            "Unable to create passcode.";
+
+    } finally {
+
+        loadingPin.value = false;
+
+    }
+
 }
 </script>

@@ -105,6 +105,7 @@ async function login() {
       email.value,
       password.value
     );
+    console.log("Login result:", result);
 
     authStore.login(result.access_token);
 
@@ -116,6 +117,7 @@ async function login() {
       username: user.username,
       email: user.email,
       isGuest: false,
+      hasPin: result.hasPin,
     });
 
     const localProfile = await profileService.getProfile();
@@ -125,7 +127,13 @@ async function login() {
 
     startHeartbeat();
 
-    router.push('/todos');
+    if (result.hasPin) {
+      router.push("/pin");
+      return;
+    }
+
+    router.push("/todos");
+
   } catch (error) {
     console.error(error);
     const apiMessage = (error as any)?.response?.data?.message;
