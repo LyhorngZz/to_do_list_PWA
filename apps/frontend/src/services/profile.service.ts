@@ -33,7 +33,7 @@ class ProfileService {
         email?: string;
         isGuest?: boolean;
         hasPin?: boolean;
-        pinHash: string;
+        pinHash?: string;
     }) {
 
         let profile = await this.getProfile();
