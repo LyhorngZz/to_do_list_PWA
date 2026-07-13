@@ -96,6 +96,20 @@ export class AuthService {
     };
   }
 
+
+  async logout(user: User) {
+    user.isLoggedIn = false;
+    user.currentDeviceId = null;
+    user.lastSeen = new Date();
+
+    await this.usersService.save(user);
+
+    return {
+      message: 'Logged out successfully.',
+    };
+  }
+
+
   async heartbeat(
     user: User,
     deviceId: string,

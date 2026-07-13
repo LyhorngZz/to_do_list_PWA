@@ -30,6 +30,15 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
+
+  @Post('logout')
+  @UseGuards(JwtAuthGuard, DeviceGuard)
+  logout(
+    @GetUser() user: User,
+  ) {
+    return this.authService.logout(user);
+  }
+
   @UseGuards(JwtAuthGuard, DeviceGuard)  
   @Get('profile')
   profile(@GetUser() user: any,) {
