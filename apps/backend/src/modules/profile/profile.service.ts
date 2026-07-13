@@ -33,12 +33,7 @@ export class ProfileService{
     );
 
     user.pin = hashedPin;
-    console.log('======================== update pin LOGIN SAVE', {
-      pin: user.pin,
-      isLoggedIn: user.isLoggedIn,
-      currentDeviceId: user.currentDeviceId,
-    });
-    await this.usersService.save(user);
+
     await this.usersService.save(user);
 
     return {
