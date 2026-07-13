@@ -82,13 +82,6 @@ export class AuthService {
 
     await this.usersService.save(user);
 
-    console.log('========================== login LOGIN SAVE', {
-      pin: user.pin,
-      isLoggedIn: user.isLoggedIn,
-      currentDeviceId: user.currentDeviceId,
-    });
-    await this.usersService.save(user);
-
     const payload = {
       sub: user.id,
       email: user.email,
@@ -99,9 +92,23 @@ export class AuthService {
       access_token: await this.jwtService.signAsync(
         payload,
       ),
-      requiresPinSetup: user.pin === null,
+      hasPin: user.pin !== null,
     };
   }
+
+
+  async logout(user: User) {
+    user.isLoggedIn = false;
+    user.currentDeviceId = null;
+    user.lastSeen = new Date();
+
+    await this.usersService.save(user);
+
+    return {
+      message: 'Logged out successfully.',
+    };
+  }
+
 
   async heartbeat(
     user: User,
@@ -118,12 +125,6 @@ export class AuthService {
 
     user.lastSeen = new Date();
 
-    await this.usersService.save(user);
-    console.log('========================== heart beat LOGIN SAVE', {
-      pin: user.pin,
-      isLoggedIn: user.isLoggedIn,
-      currentDeviceId: user.currentDeviceId,
-    });
     await this.usersService.save(user);
     return {
       success: true,
