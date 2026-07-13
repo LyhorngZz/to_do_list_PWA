@@ -5,12 +5,12 @@ class AuthService {
     async login(email: string, password: string) {
         const deviceId = getDeviceId();
 
-        //console.log("Device ID:", deviceId);
-        console.log("Sending login:", {
-            email,
-            password,
-            deviceId,
-        });
+        // //console.log("Device ID:", deviceId);
+        // console.log("Sending login:", {
+        //     email,
+        //     password,
+        //     deviceId,
+        // });
 
         const response = await api.post("/auth/login", {
             email,
@@ -32,10 +32,10 @@ class AuthService {
     }
 
     async profile() {
-        console.log(
-            "Token in localStorage:",
-            localStorage.getItem("accessToken"),
-        );
+        // console.log(
+        //     "Token in localStorage:",
+        //     localStorage.getItem("accessToken"),
+        // );
 
         const response = await api.get("/auth/profile");
 
@@ -50,6 +50,11 @@ class AuthService {
             },
         );
 
+        return response.data;
+    }
+
+    async logout() {
+        const response = await api.post("/auth/logout");
         return response.data;
     }
 }

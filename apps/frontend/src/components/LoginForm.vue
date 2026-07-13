@@ -105,13 +105,13 @@ async function login() {
       email.value,
       password.value
     );
-    console.log("Login result:", result);
+    //console.log("Login result:", result);
 
     authStore.login(result.access_token);
 
     const user = await authService.profile();
 
-    console.log("Profile from backend:", user);
+    //console.log("Profile from backend:", user);
 
     await profileService.updateProfile({
       username: user.username,
@@ -121,7 +121,7 @@ async function login() {
     });
 
     const localProfile = await profileService.getProfile();
-    console.log("Local profile: ", localProfile?.toJSON());
+    //console.log("Local profile: ", localProfile?.toJSON());
 
     await syncService.sync();
 

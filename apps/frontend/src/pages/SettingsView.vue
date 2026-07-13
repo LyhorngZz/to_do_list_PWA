@@ -204,6 +204,7 @@ import type { ProfileDocType } from "@/database/schemas/profile.schema";
 import todoService from "@/services/todo.service";
 import profileApi from "@/services/profile.api";
 import bcrypt from "bcryptjs";
+import authService from "@/services/auth.service";
 
 const profile = ref<ProfileDocType | null>(null);
 const showCreatePin = ref(false);
@@ -225,11 +226,20 @@ onMounted(async () =>{
 
 async function logout() {
 
-  await todoService.clearLocalData();
+    try {
 
-  await profileService.clearProfile();
+      if (navigator.onLine && authStore.isAuthenticated) {
+          await authService.logout();
+      }
+
+    } catch (error) {
+        console.error("Backend logout failed:", error);
+    }
 
     stopHeartbeat();
+
+    await todoService.clearLocalData();
+    await profileService.clearProfile();
 
     authStore.logout();
 
