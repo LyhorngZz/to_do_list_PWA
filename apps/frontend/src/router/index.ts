@@ -54,6 +54,7 @@ router.beforeEach(async (to) => {
   const authStore = useAuthStore();
 
   const profile = await profileService.getProfile();
+  const needPin = authStore.isAuthenticated && profile?.hasPin && !authStore.pinUnlocked;
 
   // ==========================
   // Login page
@@ -61,17 +62,23 @@ router.beforeEach(async (to) => {
 
   if (to.path === "/login") {
 
-    // Logged in and unlocked
-    if (authStore.isAuthenticated && authStore.pinUnlocked) {
-      return "/todos";
+    // Not logged in
+    if (!authStore.isAuthenticated) {
+      return true;
     }
 
-    // Logged in but locked
-    if (authStore.isAuthenticated && profile?.hasPin) {
+    // Logged in and has PIN
+    if (profile?.hasPin) {
+
+      if (authStore.pinUnlocked) {
+        return "/todos";
+      }
+
       return "/pin";
     }
 
-    return true;
+    // Logged in without PIN
+    return "/todos";
   }
 
   // ==========================
