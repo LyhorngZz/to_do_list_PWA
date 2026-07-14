@@ -6,7 +6,6 @@ import SettingsView from '@/pages/SettingsView.vue';
 import GuestForm from '@/components/GuestForm.vue';
 import PinView from '@/pages/PinView.vue';
 import profileService from '@/services/profile.service';
-import MapPage from '@/pages/MapPage.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -42,11 +41,6 @@ const router = createRouter({
       name: "pin",
       component: PinView,
     },
-    {
-      path: "/map",
-      name: 'map',
-      component: MapPage,
-    }
   ],
 });
 
